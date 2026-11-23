@@ -33,7 +33,7 @@ Windows 10 or 11 (64-bit) · internet connection
 ## Important
 Free tool only. Data comes directly from the NSE and BSE websites to your own computer, for your personal use. WealthTechnical LLP does not host or sell market data, and is not an investment adviser or research analyst – nothing here is investment advice. Investments in the securities market are subject to market risks. By installing you agree to the [Terms of Use](https://www.wealthtechnical.com/eod-downloader/terms.txt) and [Disclaimer](https://www.wealthtechnical.com/disclaimer.html).
 
-MetaStock®, NinjaTrader® and AmiBroker are trademarks of their respective owners. WealthTechnical LLP is an Ecosystem Vendor of NinjaTrader Group LLC. The NinjaTrader link on this page is our referral link – we may earn a commission if you sign up through it, at no cost to you.
+MetaStock®, NinjaTrader® and AmiBroker are trademarks of their respective owners. WealthTechnical LLP is an Ecosystem Vendor of NinjaTrader Group LLC. The NinjaTrader link on this page is our referral link.
 
 This repository hosts release notes and documentation; the program itself is closed-source freeware.
 
