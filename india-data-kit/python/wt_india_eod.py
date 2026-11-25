@@ -18,7 +18,8 @@ Command line:
     python wt_india_eod.py info
     python wt_india_eod.py breadth  --list NIFTY500
     python wt_india_eod.py sectors
-    python wt_india_eod.py export   --list NIFTY50 nifty50.csv
+    python wt_india_eod.py export   --list NIFTY50 nifty50.csv         (.parquet, or .db for SQLite)
+    python wt_india_eod.py export   --list NIFTY50 --format mt5 C:/mt5 (nt8, amibroker, metastock-csv, mt5, csv-per-symbol)
 
 For education and analysis only – not investment advice. MIT licence (see LICENSE).
 This kit does not download, contain or redistribute any market data: it only reads files
@@ -36,7 +37,7 @@ from typing import Iterable
 
 import pandas as pd
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 EXCHANGES = ("NSE", "BSE")
 COLS = ["date", "open", "high", "low", "close", "volume"]
@@ -386,6 +387,48 @@ def write_metastock_csv(df: pd.DataFrame, folder: str | os.PathLike) -> list[Pat
     return out
 
 
+def write_mt5(df: pd.DataFrame, folder: str | os.PathLike) -> list[Path]:
+    """MetaTrader 5 bar files for custom symbols (Symbols → Bars → Import Bars): tab-separated
+    <DATE> <TIME> <OPEN> <HIGH> <LOW> <CLOSE> <TICKVOL> <VOL> <SPREAD>, dates as yyyy.MM.dd."""
+    folder = Path(folder); folder.mkdir(parents=True, exist_ok=True); out = []
+    for s, g in df.dropna(subset=["date"]).sort_values("date").groupby("symbol"):
+        p = folder / f"{s}.csv"
+        with open(p, "w", encoding="utf-8", newline="\n") as f:
+            f.write("<DATE>\t<TIME>\t<OPEN>\t<HIGH>\t<LOW>\t<CLOSE>\t<TICKVOL>\t<VOL>\t<SPREAD>\n")
+            for r in g.itertuples(index=False):
+                v = int(r.volume or 0)
+                f.write(f"{r.date:%Y.%m.%d}\t00:00:00\t{_n(r.open)}\t{_n(r.high)}\t{_n(r.low)}\t{_n(r.close)}\t{v}\t{v}\t0\n")
+        out.append(p)
+    return out
+
+
+def write_csv_per_symbol(df: pd.DataFrame, folder: str | os.PathLike) -> list[Path]:
+    """Plain CSV per symbol (Date,Open,High,Low,Close,Volume) for backtesting tools and charting apps."""
+    folder = Path(folder); folder.mkdir(parents=True, exist_ok=True); out = []
+    for s, g in df.dropna(subset=["date"]).sort_values("date").groupby("symbol"):
+        p = folder / f"{s}.csv"
+        g[["date", "open", "high", "low", "close", "volume"]].rename(columns=str.capitalize).to_csv(
+            p, index=False, date_format="%Y-%m-%d", float_format="%.4f")
+        out.append(p)
+    return out
+
+
+def to_sqlite(df: pd.DataFrame, path: str | os.PathLike, table: str = "bars") -> Path:
+    """Save to a SQLite database file (indexed on symbol+date) for SQL queries and reporting tools.
+    Replaces the table if it exists."""
+    path = Path(path)
+    d = df.dropna(subset=["date"]).copy()
+    d["date"] = d["date"].dt.strftime("%Y-%m-%d")
+    with sqlite3.connect(path) as con:
+        d[["symbol"] + COLS].to_sql(table, con, if_exists="replace", index=False)
+        con.execute(f"CREATE INDEX IF NOT EXISTS idx_{table}_symbol_date ON {table}(symbol, date)")
+    return path
+
+
+WRITERS = {"nt8": write_nt8, "amibroker": write_amibroker, "metastock-csv": write_metastock_csv,
+           "mt5": write_mt5, "csv-per-symbol": write_csv_per_symbol}
+
+
 # ----------------------------------------------------------------------------- command line
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="wt_india_eod", description="Work with the NSE/BSE EOD Downloader's local data.")
@@ -397,7 +440,8 @@ def main(argv=None) -> int:
     sub.add_parser("sectors", help="sector rotation table (NSE sector watchlists)")
     e = sub.add_parser("export", help="export a watchlist (or all) to .csv/.parquet or a platform folder")
     e.add_argument("--list"); e.add_argument("--start")
-    e.add_argument("--format", default="file", choices=["file", "nt8", "amibroker", "metastock-csv"])
+    e.add_argument("--format", default="file", choices=["file"] + sorted(WRITERS),
+                   help="file = one .csv/.parquet/.db (SQLite) file; otherwise one file per symbol in the output folder")
     e.add_argument("output")
     a = ap.parse_args(argv)
     kit = Kit(a.data, a.exchange)
@@ -413,10 +457,12 @@ def main(argv=None) -> int:
     elif a.cmd == "export":
         df = kit.stocks(a.list, start=a.start) if a.list else kit.stocks(start=a.start)
         if a.format == "file":
-            print("saved", export(df, a.output))
+            if str(a.output).lower().endswith((".db", ".sqlite")):
+                print("saved", to_sqlite(df, a.output))
+            else:
+                print("saved", export(df, a.output))
         else:
-            w = {"nt8": write_nt8, "amibroker": write_amibroker, "metastock-csv": write_metastock_csv}[a.format]
-            print(f"wrote {len(w(df, a.output))} files to {a.output}")
+            print(f"wrote {len(WRITERS[a.format](df, a.output))} files to {a.output}")
     return 0
 
 

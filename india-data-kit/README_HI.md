@@ -9,10 +9,15 @@
 * **मार्केट ब्रेड्थ:** बढ़ने/गिरने वाले शेयर, A/D लाइन, 50 और 200 दिन के एवरेज से ऊपर शेयरों का %, नए 52-हफ़्ते के हाई/लो
 * **सेक्टर रोटेशन:** हर NSE सेक्टर का 1 हफ़्ता / 1, 3, 6 महीने / 1 साल का रिटर्न
 * **स्कैनर का उदाहरण:** 200-DMA से ऊपर, 52-हफ़्ते के हाई के पास, वॉल्यूम में उछाल – नियम आप बदल सकते हैं
-* **एक्सपोर्ट:** एक CSV/Parquet फ़ाइल, या **AmiBroker**, **NinjaTrader 8** और **MetaStock ASCII** फ़ोल्डर
+* **एक्सपोर्ट:** एक CSV / Parquet / SQLite फ़ाइल, या **AmiBroker**, **NinjaTrader 8**, **MetaStock ASCII**, **MetaTrader 5** और बैकटेस्टिंग टूल्स के लिए हर शेयर की अलग CSV फ़ाइल
 * **Downloader की अपनी जाँच:** क्वालिटी नोट्स, NSE बनाम BSE तुलना (ISIN से), लागू किए गए स्प्लिट/बोनस
 * **हर शाम अपने-आप:** Downloader के अपडेट के बाद आपकी स्क्रिप्ट चलाइए ([गाइड](docs/AUTOMATION.md))
 * **काल्पनिक सैंपल डेटा:** 40 काल्पनिक शेयर – असली मार्केट डेटा नहीं
+
+## इंस्टॉल
+```bash
+pip install "https://github.com/wealthtechnical-afk/nse-bse-eod-downloader/archive/refs/heads/main.zip#subdirectory=india-data-kit"
+```
 
 ## शुरुआत
 ```bash

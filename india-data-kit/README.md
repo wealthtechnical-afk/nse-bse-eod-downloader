@@ -14,11 +14,18 @@ Free, open-source (MIT) kit for the data folder of the free **[WealthTechnical N
 | **Market breadth** | advances/declines, A/D line, % above 50- and 200-day averages, new 52-week highs/lows – for any watchlist |
 | **Sector rotation** | median 1w/1m/3m/6m/1y returns and % above 200-DMA for each NSE sector list |
 | **Scanner example** | above 200-DMA, near 52-week high, volume surge – edit the rules |
-| **Exports** | one CSV/Parquet file, or folders for **AmiBroker**, **NinjaTrader 8** and **MetaStock ASCII** |
+| **Exports** | one CSV / Parquet / SQLite file, or one file per symbol for **AmiBroker**, **NinjaTrader 8**, **MetaStock ASCII**, **MetaTrader 5** or plain CSV for backtesting tools |
 | **The Downloader's own checks** | quality notes, unexplained jumps, NSE-vs-BSE cross-check by ISIN, corporate actions applied |
 | **Raw + adjusted** | read raw exchange prices (read-only) and rebuild the split/bonus adjustment yourself – matches the Downloader's exports |
 | **Automation** | run your scripts after every evening update ([guide](docs/AUTOMATION.md)) |
 | **Made-up sample data** | 40 fictional stocks in the Downloader's exact layout – everything runs before you install anything |
+
+## Install
+
+```bash
+pip install "https://github.com/wealthtechnical-afk/nse-bse-eod-downloader/archive/refs/heads/main.zip#subdirectory=india-data-kit"
+```
+This adds the `wt-india-eod` command and the `wt_india_eod` Python module. (Or download the folder and run the examples directly.)
 
 ## Quick start
 
@@ -56,7 +63,7 @@ b      = wti.breadth(kit.stocks("NIFTY500"))
 kit.sector_rotation()
 ```
 
-Guides: [data folder](docs/DATA_FOLDER.md) · [automation](docs/AUTOMATION.md) · [Excel](docs/EXCEL.md) · [AI tools](docs/AI_TOOLS.md)
+Guides: [data folder](docs/DATA_FOLDER.md) · [automation](docs/AUTOMATION.md) · [backtesting](docs/BACKTESTING.md) · [Excel](docs/EXCEL.md) · [AI tools](docs/AI_TOOLS.md)
 
 Working with MetaStock-format data from other markets? See the [global developer toolkit](https://github.com/wealthtechnical-afk/metastock-to-ninjatrader8-converter/tree/main/developer-toolkit).
 
