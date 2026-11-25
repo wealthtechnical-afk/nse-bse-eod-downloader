@@ -22,6 +22,8 @@ Free, open-source (MIT) kit for the data folder of the free **[WealthTechnical N
 
 ## Install
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/wealthtechnical-afk/nse-bse-eod-downloader/blob/main/india-data-kit/quickstart_colab.ipynb) – try it in your browser on the made-up sample data, nothing to install · [▶ 57-second demo on real NSE data](https://youtube.com/shorts/KAoXOJe1Xes)
+
 ```bash
 pip install wt-india-eod
 ```
