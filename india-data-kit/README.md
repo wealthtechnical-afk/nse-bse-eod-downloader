@@ -23,9 +23,9 @@ Free, open-source (MIT) kit for the data folder of the free **[WealthTechnical N
 ## Install
 
 ```bash
-pip install "https://github.com/wealthtechnical-afk/nse-bse-eod-downloader/archive/refs/heads/main.zip#subdirectory=india-data-kit"
+pip install wt-india-eod
 ```
-This adds the `wt-india-eod` command and the `wt_india_eod` Python module. (Or download the folder and run the examples directly.)
+From [PyPI](https://pypi.org/project/wt-india-eod/). This adds the `wt-india-eod` command and the `wt_india_eod` Python module. (Or download the folder and run the examples directly. Latest unreleased version: `pip install "https://github.com/wealthtechnical-afk/nse-bse-eod-downloader/archive/refs/heads/main.zip#subdirectory=india-data-kit"`)
 
 ## Quick start
 
