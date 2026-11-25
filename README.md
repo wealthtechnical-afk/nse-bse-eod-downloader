@@ -27,15 +27,33 @@ Free Windows program that downloads **NSE and BSE end-of-day (EOD) stock and ind
 2. Tick **NinjaTrader 8** in the downloader – it writes NT8 ASCII files.
 3. In NT8: Tools → Import → Historical Data. Already have MetaStock data? Use our free [MetaStock → NT8 Converter](https://github.com/wealthtechnical-afk/metastock-to-ninjatrader8-converter).
 
+## For developers – free India Data Kit (open source, MIT)
+
+Build on the data this program saves on your PC. The free **[india-data-kit](india-data-kit/)** ([हिंदी](india-data-kit/README_HI.md)) gives you:
+
+- **One-line loading** of NSE/BSE stocks, ~100 NSE indices and every watchlist (Nifty 50/100/200/500, Midcap, Smallcap, sectors) into pandas
+- **Market breadth** – advances/declines, % above 50/200-day averages, new 52-week highs/lows
+- **Sector rotation** table, a **scanner** example, and exports for **AmiBroker, NinjaTrader 8, MetaStock ASCII**, CSV and Parquet
+- The program's own **quality and NSE-vs-BSE checks**, raw + split/bonus-adjusted prices, and a runner that starts your scripts after every evening update
+- **Made-up sample data** so everything runs before you install anything
+
+```bash
+cd india-data-kit/examples
+python 02_market_breadth.py auto      # 'auto' finds this program's data folder
+python 03_sector_rotation.py auto
+```
+
+The kit contains and shares no market data – it only reads files on your own PC. Working with MetaStock-format data from other markets? See the [global developer toolkit](https://github.com/wealthtechnical-afk/metastock-to-ninjatrader8-converter/tree/main/developer-toolkit).
+
 ## Requirements
 Windows 10 or 11 (64-bit) · internet connection
 
 ## Important
-Free tool only. Data comes directly from the NSE and BSE websites to your own computer, for your personal use. WealthTechnical LLP does not host or sell market data, and is not an investment adviser or research analyst – nothing here is investment advice. Investments in the securities market are subject to market risks. By installing you agree to the [Terms of Use](https://www.wealthtechnical.com/eod-downloader/terms.txt) and [Disclaimer](https://www.wealthtechnical.com/disclaimer.html).
+**This free tool is for education and analysis only.** Data comes directly from the NSE and BSE websites to your own computer, for your personal use. WealthTechnical LLP does not host or sell market data, and is not an investment adviser or research analyst – nothing here is investment advice. Investments in the securities market are subject to market risks. Trading futures & options, crypto and other speculative instruments involves a high risk of loss and suits only those who understand and can bear that risk. By installing you agree to the [Terms of Use](https://www.wealthtechnical.com/eod-downloader/terms.txt) and [Disclaimer](https://www.wealthtechnical.com/disclaimer.html).
 
 MetaStock®, NinjaTrader® and AmiBroker are trademarks of their respective owners. WealthTechnical LLP is an Ecosystem Vendor of NinjaTrader Group LLC. The NinjaTrader link on this page is our referral link.
 
-This repository hosts release notes and documentation; the program itself is closed-source freeware.
+This repository hosts release notes, documentation and the open India Data Kit; the program itself is closed-source freeware.
 
 ---
 **Keywords:** NSE data download, BSE data, EOD data India, bhavcopy, MetaStock data India, AmiBroker data, NinjaTrader 8 NSE data, Nifty, Sensex, CSV stock data
