@@ -23,6 +23,7 @@ The free WealthTechnical NSE/BSE EOD Downloader saves everything on your own PC.
 | Stock prices (adjusted for splits & bonuses) | `exports\NSE\Stocks\CSV\SYMBOL.csv` | `Date,Open,High,Low,Close,Volume` (Date = yyyy-mm-dd) |
 | Index prices | `exports\NSE\Indices\CSV\SYMBOL.csv` | same |
 | Watchlists | `exports\NSE\Watchlists\Lists\NAME.txt` | one symbol per line |
+| Stocks – WealthTechnical Data Tool export (used automatically if the CSV export is not ticked) | `exports\NSE\Stocks\WealthTool\SYMBOL.txt` | `Ticker,Date,Open,High,Low,Close,Volume` (Date = yyyymmdd) |
 | Index names | `exports\NSE\Indices\index_symbols.csv` | `index,symbol` |
 
 **Adjustment rule (“Option A”):** splits and bonuses only. Prices before the ex-date are multiplied by the factor and volume divided by it; dividends are not adjusted. `Kit.adjusted_from_raw()` rebuilds this from the raw database so you can check it.

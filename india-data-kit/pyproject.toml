@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wt-india-eod"
-version = "1.1.0"
-description = "Work with the free WealthTechnical NSE/BSE EOD Downloader's local data in Python - watchlists, indices, market breadth, sector rotation, quality checks and exports for NT8, AmiBroker, MetaStock, MetaTrader 5, CSV and SQLite."
+version = "1.1.1"
+description = "Work with the free WealthTechnical NSE/BSE EOD Downloader's local data in Python - watchlists, indices, market breadth, sector rotation, quality checks and exports for NT8, AmiBroker, MetaStock, MetaTrader 5, WealthTechnical Data Tool, CSV and SQLite."
 readme = "README.md"
 license = { text = "MIT" }
 authors = [{ name = "WealthTechnical LLP" }]

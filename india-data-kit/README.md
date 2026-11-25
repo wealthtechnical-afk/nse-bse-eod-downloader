@@ -14,7 +14,7 @@ Free, open-source (MIT) kit for the data folder of the free **[WealthTechnical N
 | **Market breadth** | advances/declines, A/D line, % above 50- and 200-day averages, new 52-week highs/lows – for any watchlist |
 | **Sector rotation** | median 1w/1m/3m/6m/1y returns and % above 200-DMA for each NSE sector list |
 | **Scanner example** | above 200-DMA, near 52-week high, volume surge – edit the rules |
-| **Exports** | one CSV / Parquet / SQLite file, or one file per symbol for **AmiBroker**, **NinjaTrader 8**, **MetaStock ASCII**, **MetaTrader 5** or plain CSV for backtesting tools |
+| **Exports** | one CSV / Parquet / SQLite file, or one file per symbol for **AmiBroker**, **NinjaTrader 8**, **MetaStock ASCII**, **MetaTrader 5**, **WealthTechnical Data Tool** or plain CSV for backtesting tools. Reads the Downloader's CSV or WealthTechnical Data Tool export |
 | **The Downloader's own checks** | quality notes, unexplained jumps, NSE-vs-BSE cross-check by ISIN, corporate actions applied |
 | **Raw + adjusted** | read raw exchange prices (read-only) and rebuild the split/bonus adjustment yourself – matches the Downloader's exports |
 | **Automation** | run your scripts after every evening update ([guide](docs/AUTOMATION.md)) |

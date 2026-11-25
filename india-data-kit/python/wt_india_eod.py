@@ -19,7 +19,7 @@ Command line:
     python wt_india_eod.py breadth  --list NIFTY500
     python wt_india_eod.py sectors
     python wt_india_eod.py export   --list NIFTY50 nifty50.csv         (.parquet, or .db for SQLite)
-    python wt_india_eod.py export   --list NIFTY50 --format mt5 C:/mt5 (nt8, amibroker, metastock-csv, mt5, csv-per-symbol)
+    python wt_india_eod.py export   --list NIFTY50 --format mt5 C:/mt5 (nt8, amibroker, metastock-csv, mt5, csv-per-symbol, wealthtool)
 
 For education and analysis only – not investment advice. MIT licence (see LICENSE).
 This kit does not download, contain or redistribute any market data: it only reads files
@@ -37,7 +37,7 @@ from typing import Iterable
 
 import pandas as pd
 
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 
 EXCHANGES = ("NSE", "BSE")
 COLS = ["date", "open", "high", "low", "close", "volume"]
@@ -98,6 +98,19 @@ class Kit:
         self.exports = _ci(self.root / "exports", self.exchange)
         if not self.exports.is_dir():
             raise FileNotFoundError(f"{self.exports} not found – is {self.exchange} ticked in the Downloader?")
+        # read the CSV export if present, otherwise the WealthTechnical Data Tool ("WealthTool") export
+        csv_dir = self._dir("Stocks", "CSV")
+        self.source = "CSV" if csv_dir.is_dir() and any(csv_dir.glob("*.csv")) else \
+            ("WealthTool" if self._dir("Stocks", "WealthTool").is_dir() else "CSV")
+        self.ext = ".csv" if self.source == "CSV" else ".txt"
+
+    def _read(self, path: Path, symbol: str | None = None) -> pd.DataFrame:
+        if self.source == "CSV":
+            return read_csv_bars(path, symbol)
+        df = read_wealthtool(path)
+        if symbol:
+            df["symbol"] = symbol
+        return df
 
     # folders
     def _dir(self, kind: str, fmt: str) -> Path:
@@ -111,7 +124,7 @@ class Kit:
     # lists
     def symbols(self) -> list[str]:
         """All stock symbols in the CSV export."""
-        return sorted(p.stem for p in self._dir("Stocks", "CSV").glob("*.csv"))
+        return sorted(p.stem for p in self._dir("Stocks", self.source).glob("*" + self.ext))
 
     def watchlists(self) -> list[str]:
         d = self._dir("Watchlists", "Lists")
@@ -130,13 +143,16 @@ class Kit:
     def last_date(self) -> pd.Timestamp | None:
         """Latest date in the exported files (reads only the last line of the index files,
         falling back to stock files)."""
-        files = sorted(self._dir("Indices", "CSV").glob("*.csv")) or sorted(self._dir("Stocks", "CSV").glob("*.csv"))[:300]
+        files = sorted(self._dir("Indices", self.source).glob("*" + self.ext)) or \
+            sorted(self._dir("Stocks", self.source).glob("*" + self.ext))[:300]
         best = None
         for f in files:
             try:
                 with open(f, "rb") as fh:
                     fh.seek(0, 2); fh.seek(max(0, fh.tell() - 200))
-                    d = pd.to_datetime(fh.read().decode("utf-8", "ignore").strip().splitlines()[-1].split(",")[0], errors="coerce")
+                    last = fh.read().decode("utf-8", "ignore").strip().splitlines()[-1].split(",")
+                    raw = last[0] if self.source == "CSV" else last[1]
+                    d = pd.to_datetime(raw, format="%Y%m%d" if raw.isdigit() else None, errors="coerce")
                 if pd.notna(d) and (best is None or d > best):
                     best = d
             except (OSError, IndexError):
@@ -145,7 +161,7 @@ class Kit:
 
     # prices
     def stock(self, symbol: str) -> pd.DataFrame:
-        return read_csv_bars(self._dir("Stocks", "CSV") / f"{symbol}.csv", symbol)
+        return self._read(self._dir("Stocks", self.source) / f"{symbol}{self.ext}", symbol)
 
     def stocks(self, symbols: Iterable[str] | str | None = None, start: str | None = None,
                missing: str = "warn") -> pd.DataFrame:
@@ -154,13 +170,13 @@ class Kit:
             symbols = self.watchlist(symbols)
         symbols = list(symbols) if symbols is not None else self.symbols()
         frames, miss = [], []
-        d = self._dir("Stocks", "CSV")
+        d = self._dir("Stocks", self.source)
         for s in symbols:
-            p = d / f"{s}.csv"
+            p = d / f"{s}{self.ext}"
             if not p.exists():
                 miss.append(s)
                 continue
-            df = read_csv_bars(p, s)
+            df = self._read(p, s)
             if start:
                 df = df[df["date"] >= pd.Timestamp(start)]
             frames.append(df)
@@ -172,15 +188,15 @@ class Kit:
 
     def index(self, symbol: str) -> pd.DataFrame:
         """Index history by symbol (e.g. NIFTY50, NIFTYBANK, INDIAVIX). Also accepts the index name."""
-        d = self._dir("Indices", "CSV")
-        p = d / f"{symbol}.csv"
+        d = self._dir("Indices", self.source)
+        p = d / f"{symbol}{self.ext}"
         if not p.exists():
             t = self.indices()
             hit = t[t["index"].str.upper() == symbol.upper()]
             if hit.empty:
                 raise KeyError(f"index {symbol!r} not found")
-            p = d / f"{hit['symbol'].iloc[0]}.csv"
-        return read_csv_bars(p, p.stem)
+            p = d / f"{hit['symbol'].iloc[0]}{self.ext}"
+        return self._read(p, p.stem)
 
     # review files written by the Downloader
     def review(self, name: str) -> pd.DataFrame:
@@ -425,8 +441,48 @@ def to_sqlite(df: pd.DataFrame, path: str | os.PathLike, table: str = "bars") ->
     return path
 
 
+# ----------------------------------------------------------------------------- WealthTechnical Data Tool format
+WEALTHTOOL_COLUMNS = ["Ticker", "Date", "Open", "High", "Low", "Close", "Volume"]
+
+
+def write_wealthtool(df: pd.DataFrame, folder: str | os.PathLike, delimiter: str = ",",
+                     date_format: str = "%Y%m%d", header: bool = True,
+                     columns: list | None = None, extension: str = ".txt") -> list[Path]:
+    """WealthTechnical Data Tool files – the same layout as the Downloader's "WealthTool" export:
+    SYMBOL.txt with Ticker,Date(yyyymmdd),Open,High,Low,Close,Volume (prices to 4 decimals).
+    delimiter, date_format, header, columns and extension follow the Downloader's WealthTool settings."""
+    cols = columns or WEALTHTOOL_COLUMNS
+    folder = Path(folder); folder.mkdir(parents=True, exist_ok=True); out = []
+    for sym, g in df.dropna(subset=["date"]).sort_values("date").groupby("symbol"):
+        p = folder / f"{sym}{extension}"
+        with open(p, "w", encoding="utf-8", newline="\n") as f:
+            if header:
+                f.write(delimiter.join(cols) + "\n")
+            for r in g.itertuples(index=False):
+                vals = {"Ticker": str(sym), "Date": r.date.strftime(date_format), "Open": f"{r.open:.4f}",
+                        "High": f"{r.high:.4f}", "Low": f"{r.low:.4f}", "Close": f"{r.close:.4f}",
+                        "Volume": str(0 if pd.isna(r.volume) else int(r.volume))}
+                f.write(delimiter.join(vals[c] for c in cols if c in vals) + "\n")
+        out.append(p)
+    return out
+
+
+def read_wealthtool(path: str | os.PathLike, delimiter: str = ",", date_format: str = "%Y%m%d") -> pd.DataFrame:
+    """Read one WealthTechnical Data Tool file (with a header line, as the Downloader writes by default)."""
+    d = pd.read_csv(path, sep=delimiter, dtype={"Date": str})
+    d.columns = [c.strip().lower() for c in d.columns]
+    d["date"] = pd.to_datetime(d["date"].astype(str).str.strip(), format=date_format, errors="coerce")
+    sym = d.pop("ticker") if "ticker" in d.columns else Path(path).stem
+    d.insert(0, "symbol", sym if isinstance(sym, str) else sym.astype(str))
+    for c in ["open", "high", "low", "close", "volume"]:
+        if c not in d.columns:
+            d[c] = pd.NA
+        d[c] = pd.to_numeric(d[c], errors="coerce")
+    return d[["symbol", "date", "open", "high", "low", "close", "volume"]]
+
+
 WRITERS = {"nt8": write_nt8, "amibroker": write_amibroker, "metastock-csv": write_metastock_csv,
-           "mt5": write_mt5, "csv-per-symbol": write_csv_per_symbol}
+           "mt5": write_mt5, "csv-per-symbol": write_csv_per_symbol, "wealthtool": write_wealthtool}
 
 
 # ----------------------------------------------------------------------------- command line
