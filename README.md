@@ -31,7 +31,7 @@ Free Windows program that downloads **NSE and BSE end-of-day (EOD) stock and ind
 
 Build on the data this program saves on your PC. The free **[india-data-kit](india-data-kit/)** ([हिंदी](india-data-kit/README_HI.md)) gives you:
 
-**Install:** `pip install wt-india-eod` ([PyPI](https://pypi.org/project/wt-india-eod/))
+**Install:** `pip install wt-india-eod` ([PyPI](https://pypi.org/project/wt-india-eod/)) · [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/wealthtechnical-afk/nse-bse-eod-downloader/blob/main/india-data-kit/quickstart_colab.ipynb) · [▶ 57-second demo](https://youtube.com/shorts/KAoXOJe1Xes)
 
 - **One-line loading** of NSE/BSE stocks, ~100 NSE indices and every watchlist (Nifty 50/100/200/500, Midcap, Smallcap, sectors) into pandas
 - **Market breadth** – advances/declines, % above 50/200-day averages, new 52-week highs/lows
