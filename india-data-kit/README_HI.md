@@ -16,8 +16,9 @@
 
 ## इंस्टॉल
 ```bash
-pip install "https://github.com/wealthtechnical-afk/nse-bse-eod-downloader/archive/refs/heads/main.zip#subdirectory=india-data-kit"
+pip install wt-india-eod
 ```
+[PyPI](https://pypi.org/project/wt-india-eod/) से।
 
 ## शुरुआत
 ```bash
